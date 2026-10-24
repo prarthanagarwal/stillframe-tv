@@ -1,4 +1,4 @@
-name: Personal Home CI
+name: Stillframe CI
 
 on:
   push:

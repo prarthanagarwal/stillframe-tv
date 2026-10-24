@@ -44,7 +44,7 @@ def install(serial, name):
     abis = device.shell("getprop", "ro.product.cpu.abilist").split(",")
     if not set(abis).intersection({"armeabi-v7a", "arm64-v8a", "x86_64"}):
         raise RuntimeError("The official receiver APK does not support this CPU architecture")
-    with tempfile.TemporaryDirectory(prefix="personal-home-airplay-") as folder:
+    with tempfile.TemporaryDirectory(prefix="stillframe-airplay-") as folder:
         apk = Path(folder) / "airplay.apk"
         print(f"Downloading official AirPlay Server {VERSION}…")
         with urllib.request.urlopen(URL, timeout=60) as response, apk.open("wb") as out:
