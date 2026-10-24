@@ -48,6 +48,12 @@ final class WallpaperPlayer {
     private final int dimColor;
     /** The picture on screen, released once the next one has been drawn. */
     private Bitmap current;
+    private java.util.function.Consumer<Bitmap> glassListener;
+
+    void setGlassListener(java.util.function.Consumer<Bitmap> listener) {
+        glassListener = listener;
+        if (current != null) listener.accept(current);
+    }
     private boolean active;
     private boolean closed;
     private boolean loading;
@@ -144,6 +150,7 @@ final class WallpaperPlayer {
         // The renderer may still have a queued frame that references this hardware bitmap. Drop our references and
         // let Android reclaim its native buffer after rendering releases it instead of recycling it mid-frame.
         current = null;
+        if (glassListener != null) glassListener.accept(null);
         displayed = "";
         root.setBackgroundColor(backgroundColor);
     }
@@ -266,6 +273,7 @@ final class WallpaperPlayer {
         // The wallpaper covers the whole root; avoid drawing the fallback colour under it.
         root.setBackground(null);
         image.setImageBitmap(bitmap);
+        if (glassListener != null) glassListener.accept(bitmap);
         if (old != null && old != bitmap) image.postDelayed(old::recycle, 500);
     }
 

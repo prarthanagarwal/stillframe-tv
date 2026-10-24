@@ -1,0 +1,16 @@
+# Exact packages disabled on the owner’s MiTV-AXSO1, Android 9 PI.6157.
+# Reference only: not a generic Android TV removal list. Disable, never uninstall.
+com.miui.tv.analytics
+com.xiaomi.statistic
+com.google.android.feedback
+com.google.android.tv.bugreportsender
+com.mitv.tvhome.atv
+com.xm.webcontent
+com.xiaomi.floatingframe
+com.google.android.tvrecommendations
+com.google.android.leanbacklauncher.recommendations
+android.autoinstalls.config.xioami.dangal
+android.autoinstalls.config.xiaomi.amelie
+com.google.android.tvlauncher
+com.google.android.videos
+com.mitv.tvhome.mitvplus

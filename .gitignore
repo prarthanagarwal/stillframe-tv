@@ -19,3 +19,9 @@ traces/
 *.aab
 launcher/hs_err_pid*.log
 launcher/replay_pid*.log
+
+# Personal Home companion and local publishing data
+__pycache__/
+*.py[cod]
+*.keystore
+*.jks

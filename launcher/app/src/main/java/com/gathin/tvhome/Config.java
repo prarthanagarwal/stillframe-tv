@@ -558,7 +558,9 @@ final class Config {
         SharedPreferences choices = ctx.getSharedPreferences(SETTINGS_NAME, Context.MODE_PRIVATE);
         // Unmounted storage looks like a theme reset; compare only once the file is readable.
         if (mounted) syncThemeChoices(choices, dir, file);
-        int chosenColumns = choices.getInt("columns", columns);
+        dock = HomePreferences.dock(ctx, dock);
+        hidden.addAll(DockSelection.parse(choices.getString("custom_hidden", ""), 128));
+        int chosenColumns = choices.getInt("columns", Math.max(4, dock.size()));
         if (chosenColumns >= 4 && chosenColumns <= 7) columns = chosenColumns;
         int chosenRows = choices.getInt(ROWS_BELOW_DOCK_KEY, rowsBelow);
         if (chosenRows >= 0 && chosenRows <= 3) rowsBelow = chosenRows;
@@ -569,9 +571,10 @@ final class Config {
         // A theme can also switch the wallpaper off while the file is still there.
         boolean wallpaperEnabled = json == null || bool(json, "wallpaper", true);
         if (!wallpaperEnabled) wallpaper = null;
-        int rotationMinutes = json == null ? 0 : integer(json, "wallpaper_rotation_minutes", 0, 0, 1440);
-        int wallpaperDim = json == null ? 0 : integer(json, "wallpaper_dim", 0, 0, 90);
-        int dockOpacity = json == null ? 100 : integer(json, "dock_opacity", 100, 30, 100);
+        int rotationMinutes = choices.getInt("custom_rotation", json == null ? 0 : integer(json, "wallpaper_rotation_minutes", 0, 0, 1440));
+        int wallpaperDim = json == null ? 22 : integer(json, "wallpaper_dim", 0, 0, 90);
+        wallpaperDim = choices.getInt("custom_wallpaper_dim", wallpaperDim);
+        int dockOpacity = json == null ? 55 : integer(json, "dock_opacity", 100, 30, 100);
         dockOpacity = chosenDockOpacity(choices.getInt(DOCK_OPACITY_KEY, -1), dockOpacity);
         String wallpaperOrder = json == null ? WallpaperRotation.ORDER_SHUFFLE
                 : string(json, "wallpaper_order", WallpaperRotation.ORDER_SHUFFLE);
@@ -660,7 +663,7 @@ final class Config {
 
     /** The dock band opacity chosen in Launcher settings, or the theme's when none (or an out-of-range one) is saved. */
     static int chosenDockOpacity(int chosen, int theme) {
-        return chosen >= 30 && chosen <= 100 ? chosen : theme;
+        return chosen >= 0 && chosen <= 100 ? chosen : theme;
     }
 
     private static String fileStamp(File file) {

@@ -16,10 +16,14 @@ public class DockOpacityTest {
         assertEquals(80, Config.chosenDockOpacity(-1, 80));
     }
 
+    @Test public void sliderSupportsTransparentAndIntermediateGlass() {
+        assertEquals(0, Config.chosenDockOpacity(0, 80));
+        assertEquals(29, Config.chosenDockOpacity(29, 80));
+        assertEquals(56, Config.chosenDockOpacity(56, 80));
+    }
+
     @Test public void anOutOfRangeChoiceIsIgnored() {
-        // Below 30 the band would vanish and the dock lose its shape; the theme key has the same floor.
-        assertEquals(80, Config.chosenDockOpacity(0, 80));
-        assertEquals(80, Config.chosenDockOpacity(29, 80));
+        assertEquals(80, Config.chosenDockOpacity(-20, 80));
         assertEquals(80, Config.chosenDockOpacity(101, 80));
     }
 }

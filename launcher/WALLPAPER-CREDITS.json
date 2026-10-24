@@ -1,0 +1,35 @@
+[
+  {
+    "id": "forest",
+    "name": "Forest mist",
+    "src": "assets/wallpapers/forest.jpg",
+    "thumb": "assets/wallpapers/forest-thumb.jpg",
+    "pos": "50% 50%",
+    "tone": "dark",
+    "credit": "Dejan Zakic",
+    "source": "https://unsplash.com/photos/rr2EF3J5F2Y",
+    "bundled_file": "app/src/main/assets/wallpapers/Forest mist.jpg"
+  },
+  {
+    "id": "valley",
+    "name": "Mountain valley",
+    "src": "assets/wallpapers/valley.jpg",
+    "thumb": "assets/wallpapers/valley-thumb.jpg",
+    "pos": "50% 50%",
+    "tone": "dark",
+    "credit": "Aniket Deole",
+    "source": "https://unsplash.com/photos/M6XC789HLe8",
+    "bundled_file": "app/src/main/assets/wallpapers/Mountain valley.jpg"
+  },
+  {
+    "id": "peaks",
+    "name": "Blue peaks",
+    "src": "assets/wallpapers/peaks.jpg",
+    "thumb": "assets/wallpapers/peaks-thumb.jpg",
+    "pos": "50% 50%",
+    "tone": "dark",
+    "credit": "John Rodenn Castillo",
+    "source": "https://unsplash.com/photos/rQqWOHZ96OM",
+    "bundled_file": "app/src/main/assets/wallpapers/Blue peaks.jpg"
+  }
+]

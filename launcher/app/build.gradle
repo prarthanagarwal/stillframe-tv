@@ -11,8 +11,9 @@ android {
         applicationId providers.gradleProperty('launcherApplicationId').getOrElse('com.gathin.tvhome')
         minSdk 26
         targetSdk 34
+        // Keep the installed code so the saved signed launcher can be restored without a downgrade.
         versionCode 8
-        versionName '2.7'
+        versionName '3.1-personal'
     }
 
     buildTypes {

@@ -1,6 +1,9 @@
 package com.gathin.tvhome;
 
 import android.graphics.Canvas;
+import android.graphics.Bitmap;
+import android.graphics.BitmapShader;
+import android.graphics.Matrix;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Rect;
@@ -15,6 +18,15 @@ import androidx.recyclerview.widget.RecyclerView;
 public class DockDecoration extends RecyclerView.ItemDecoration {
 
     private final int dockSize;
+    private android.widget.FrameLayout backdropRoot;
+    private RecyclerView backdropGrid;
+    private java.util.concurrent.ExecutorService blurWorker;
+    private final Paint frost = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG);
+    private final Matrix frostMatrix = new Matrix();
+    private final int[] windowLocation = new int[2];
+    private int blurStrength, generation;
+    private boolean closed;
+    private Bitmap blurredWallpaper;
     private final float density;
     private final Paint band = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint edge = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -24,6 +36,7 @@ public class DockDecoration extends RecyclerView.ItemDecoration {
     private final float namesRoom;
     /** Light glass like the top bar's pills (config.xml dock_glass): a white tint that fades downwards. */
     private final boolean lightGlass;
+    private final int glassOpacity;
     /** Padding all round the tiles equal to the gap between them (config.xml dock_even_padding). */
     private final boolean evenPadding;
     /** The band's top and bottom the glass gradient was made for; it is remade when they move. */
@@ -50,11 +63,57 @@ public class DockDecoration extends RecyclerView.ItemDecoration {
         this.density = density;
         this.namesRoom = names ? 22 * density : 0;
         this.lightGlass = lightGlass;
+        this.glassOpacity = opacity;
         this.evenPadding = evenPadding;
         band.setColor(translucent ? 0x8C121014 : (Math.round(opacity * 2.55f) << 24) | 0x141416);
         edge.setStyle(Paint.Style.STROKE);
         edge.setStrokeWidth(density);
-        edge.setColor(lightGlass ? 0x38FFFFFF : translucent ? 0x26FFFFFF : 0x1FFFFFFF);
+        edge.setColor((Math.round(opacity * 0.7f) << 24) | 0xFFFFFF);
+    }
+
+    void enableBlur(android.widget.FrameLayout root, RecyclerView grid, int strength) {
+        backdropRoot = root; backdropGrid = grid;
+        blurStrength = DockLayout.clamp(strength, 0, 100);
+        if (blurStrength > 0) blurWorker = java.util.concurrent.Executors.newSingleThreadExecutor();
+    }
+
+    void setWallpaper(Bitmap original) {
+        int token = ++generation;
+        if (closed || blurWorker == null) return;
+        if (original == null) { blurredWallpaper = null; frost.setShader(null); backdropGrid.invalidate(); return; }
+        blurWorker.execute(() -> {
+            Bitmap software = null, small = null;
+            try {
+                software = original.copy(Bitmap.Config.ARGB_8888, false);
+                if (software == null) return;
+                int w = Math.min(480, software.getWidth());
+                int h = Math.max(1, Math.round(software.getHeight() * w / (float) software.getWidth()));
+                // A portrait import stays bounded too; only a cached material is needed here.
+                if (h > 480) { w = Math.max(1, Math.round(w * 480f / h)); h = 480; }
+                small = Bitmap.createScaledBitmap(software, w, h, true);
+                int[] pixels = new int[w * h]; small.getPixels(pixels, 0, w, 0, 0, w, h);
+                PixelBlur.apply(pixels, w, h, DockLayout.blurRadius(blurStrength));
+                Bitmap material = Bitmap.createBitmap(pixels, w, h, Bitmap.Config.ARGB_8888);
+                backdropGrid.post(() -> {
+                    if (closed || token != generation) { material.recycle(); return; }
+                    blurredWallpaper = material;
+                    frost.setShader(new BitmapShader(material, Shader.TileMode.CLAMP, Shader.TileMode.CLAMP));
+                    frost.setAlpha(Math.round(glassOpacity * 2.55f));
+                    backdropGrid.invalidate();
+                });
+            } catch (Exception | OutOfMemoryError e) {
+                android.util.Log.w("Home.Glass", "Could not prepare dock material", e);
+            } finally {
+                if (small != null && small != software) small.recycle();
+                if (software != null) software.recycle();
+            }
+        });
+    }
+
+    void close() {
+        closed = true; generation++;
+        if (blurWorker != null) blurWorker.shutdownNow();
+        blurredWallpaper = null; frost.setShader(null);
     }
 
     /** Concentric corners: the band's radius is the tiles' radius plus the band's padding around them. */
@@ -136,10 +195,19 @@ public class DockDecoration extends RecyclerView.ItemDecoration {
         rect.bottom += namesRoom;
         if (lightGlass && (rect.top != shaderTop || rect.bottom != shaderBottom)) {
             // The pills' glass (pill_bg: white, 18% fading to 8%), a little fainter over this much larger area.
-            band.setShader(new LinearGradient(0, rect.top, 0, rect.bottom, 0x24FFFFFF, 0x0DFFFFFF,
+            band.setShader(new LinearGradient(0, rect.top, 0, rect.bottom, (Math.round(80 * glassOpacity / 100f) << 24) | 0xFFFFFF, (Math.round(30 * glassOpacity / 100f) << 24) | 0xFFFFFF,
                     Shader.TileMode.CLAMP));
             shaderTop = rect.top;
             shaderBottom = rect.bottom;
+        }
+        if (blurredWallpaper != null && frost.getShader() != null) {
+            parent.getLocationInWindow(windowLocation);
+            float scale = Math.max(backdropRoot.getWidth() / (float) blurredWallpaper.getWidth(), backdropRoot.getHeight() / (float) blurredWallpaper.getHeight());
+            frostMatrix.setScale(scale, scale);
+            frostMatrix.postTranslate((backdropRoot.getWidth() - blurredWallpaper.getWidth() * scale) / 2 - windowLocation[0],
+                    (backdropRoot.getHeight() - blurredWallpaper.getHeight() * scale) / 2 - windowLocation[1]);
+            frost.getShader().setLocalMatrix(frostMatrix);
+            c.drawRoundRect(rect, radius, radius, frost);
         }
         c.drawRoundRect(rect, radius, radius, band);
         c.drawRoundRect(rect, radius, radius, edge);

@@ -1,0 +1,5 @@
+# Home design
+A television viewed from the sofa in a dim living room, with a quiet landscape and controls legible at a distance.
+Use a restrained palette: tinted dark neutrals, white text and one focus highlight. Retain native text and input navigation. Set six compact dock tiles by default, translucent glass around the dock and a clearly visible focused app. Hide the large app-name hero and content previews. Keep the time/date header, one weather line and Inputs, network and Home Settings controls. Settings use native full-width rows grouped into Apps and Dock, Background, Weather, and TV.
+
+The dock and app grid have separate sizing. Normal app tiles retain 16:9 proportions. Dock thickness is independently adjustable from 40–140%, and its vertical position moves between the bottom and the safe area below the header. Home Settings has a fixed header with TV Settings at the top right, left navigation and a focused content panel. Native remote-friendly sliders control opacity and cached wallpaper blur from 0–100%. Blur is prepared off the UI thread when the wallpaper changes. The Dock panel shows a layout preview.
