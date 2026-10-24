@@ -10,6 +10,8 @@ Before changing any other device, inspect its actual packages, save enabled/disa
 
 This TV's Google launcher has higher HOME intent priority. During the original setup it was disabled only after Stillframe was installed, visually verified and tested. Keep an ADB recovery connection and the prior Home component before a first-time handover. Installing a launcher does not by itself prove the firmware selected it.
 
+The TV selects Stillframe as its Android Home, but its input layer may restore a tuner/HDMI signal at power-on. **Developer → Open Stillframe after startup** is enabled to bring Home forward after the TV input services settle (about 12 seconds). This does not change HDMI-CEC or the stored input selection; turn the option off to keep the TV's own startup choice.
+
 ## DNS
 
 The owner chose AdGuard Private DNS, hostname `dns.adguard-dns.com`, mode `hostname`. The original DNS values were unset. Undo restores the original values with `settings delete global private_dns_mode` and `settings delete global private_dns_specifier`. DNS filtering cannot remove every advertisement inside streaming apps. Do not enable this over a router's existing DNS/domain-routing rules without checking their effect.

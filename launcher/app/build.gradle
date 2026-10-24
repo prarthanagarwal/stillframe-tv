@@ -12,7 +12,7 @@ android {
         minSdk 26
         targetSdk 34
         // Keep the installed code so the saved signed launcher can be restored without a downgrade.
-        versionCode 9
+        versionCode 10
         versionName '1.0'
     }
 

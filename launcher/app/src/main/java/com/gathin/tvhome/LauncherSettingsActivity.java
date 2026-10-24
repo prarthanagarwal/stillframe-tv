@@ -154,6 +154,9 @@ public final class LauncherSettingsActivity extends Activity {
         });
         text("ADB control is optional. Android keeps other protected developer options in its system settings.",
                 13, 0xFF91A9B7, 18);
+        toggleRow("Open Stillframe after startup", "boot_home_after_start", true);
+        text("If the TV starts on an HDMI or tuner screen, Stillframe opens after startup settles. Turn this off to keep the TV's own startup choice.",
+                13, 0xFF91A9B7, 8);
     }
     private void confirmAdbChange(CompoundButton button, boolean current, boolean requested) {
         button.setOnCheckedChangeListener(null);

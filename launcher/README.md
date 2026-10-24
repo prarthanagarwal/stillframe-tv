@@ -2,7 +2,7 @@
 
 Your independent, editable Android TV launcher fork, based on CleanYourTV at commit eb0131a32fd8567086f39002f1782f7c1b078ca6. Tested device: Xiaomi MiTV-AXSO1, Android 9 / SDK 28, firmware PI.6157.
 
-Version: **1.0** (version code 9). It updates the existing `com.gathin.tvhome` identity to preserve your Home assignment and preferences. Original licences and credits are retained. Published project: https://github.com/prarthanagarwal/stillframe-tv . The root README contains the real TV screenshots, releases and companion AirPlay setup.
+Version: **1.0** (version code 10). It updates the existing `com.gathin.tvhome` identity to preserve your Home assignment and preferences. Original licences and credits are retained. Published project: https://github.com/prarthanagarwal/stillframe-tv . The root README contains the real TV screenshots, releases and companion AirPlay setup.
 
 ## Included controls
 
@@ -17,6 +17,7 @@ Version: **1.0** (version code 9). It updates the existing `com.gathin.tvhome` i
 - Surat weather by default, city search, Celsius/Fahrenheit and a weather toggle.
 - AirPlay settings shortcut; the receiver is a separate GPL-3 application.
 - Developer page: confirmed ADB switch, Android Developer options and native TV settings. The switch needs the optional `WRITE_SECURE_SETTINGS` grant.
+- Startup: opens Stillframe after Android's startup/input settling delay; can be turned off from Developer settings.
 - No recommendation preview or analytics.
 
 Changes save on the TV. Press Left/Right on a slider; return Home to apply layout/material changes. Dock position runs from Bottom to Top within the space below the header. Thickness is 40–140% of normal tile height; the app grid stays at its original proportions.
@@ -31,7 +32,7 @@ Use JDK 17, Android SDK platform 34, build-tools 34.0.0 and platform-tools. Set 
 ./gradlew --no-daemon testReleaseUnitTest lintRelease assembleRelease
 ```
 
-The signed APK is `app/build/outputs/apk/release/app-release.apk`. Keep the Android signing key used for the first installation; later updates require that same key. Version code 9 is higher than the installed 3.1 build code 8, so Android accepts this in-place update; the displayed version is 1.0.
+The signed APK is `app/build/outputs/apk/release/app-release.apk`. Keep the Android signing key used for the first installation; later updates require that same key. Version code 10 is higher than the installed 3.1 build code 8, so Android accepts this in-place update; the displayed version is 1.0.
 
 With the TV connected and authorized over ADB:
 
@@ -48,6 +49,7 @@ GRANT_ADB_CONTROL=1 TV_SERIAL=TV_IP:5555 ./build-and-install.sh
 - `DockDecoration.java`, `PixelBlur.java`: cached frosted dock material.
 - `HomePreferences.java`, `Config.java`: saved choices and shipped defaults.
 - `WeatherLine.java`: cached Open-Meteo header weather, active only while Home is visible.
+- `HomeBootReceiver.java`: optional delayed return to Stillframe after power-on.
 - `MainActivity.java`: Home, remote navigation, inputs and app launch integration.
 - `app/src/main/res/values/config.xml`: default dock, native layout and enabled controls.
 

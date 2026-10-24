@@ -2,7 +2,7 @@
 
 A calm Android TV home screen with a glass dock, landscape wallpapers, weather and settings you can change from the remote. Built on [CleanYourTV](https://github.com/Gathin23/cleanyourtv), customised and tested on a Xiaomi Mi TV.
 
-[Download Stillframe 1.0](https://github.com/prarthanagarwal/stillframe-tv/releases/tag/stillframe-v1.0) · [Build from source](#build-from-source) · [AirPlay setup](airplay/README.md) · [Device setup and recovery](launcher/setup/README.md)
+[Download Stillframe 1.0, build 10](https://github.com/prarthanagarwal/stillframe-tv/releases/tag/stillframe-v1.0-startup) · [Build from source](#build-from-source) · [AirPlay setup](airplay/README.md) · [Device setup and recovery](launcher/setup/README.md)
 
 ![Stillframe on a real Mi TV: forest wallpaper, time, Surat weather and a six-app glass dock](docs/images/home.png)
 
@@ -19,6 +19,7 @@ A calm Android TV home screen with a glass dock, landscape wallpapers, weather a
 | TV | Inputs, network and Home Settings on Home; TV Settings stays at the top right inside settings |
 | Receivers | AirPlay settings shortcut, with the existing Chromecast receiver retained |
 | Developer | Confirmed ADB switch and shortcuts to Android Developer options and native TV settings |
+| Startup | Opens Stillframe after Android settles if this TV initially shows a signal input; can be turned off |
 
 The initial dock is **Netflix, Prime Video, YouTube, JioHotstar, Stremio and Spotify**. There are no recommendation previews or sponsored content rows in Stillframe.
 
@@ -60,19 +61,19 @@ The owner also enabled AdGuard Private DNS (`dns.adguard-dns.com`) and confirmed
 
 ## Developer controls
 
-Home Settings includes a **Developer** page with the current ADB debugging state, a confirmed on/off switch, Android Developer options and native TV settings. The switch requires the optional `WRITE_SECURE_SETTINGS` grant; this powerful Android permission is not granted by default. From `launcher/`, grant it during an install with `GRANT_ADB_CONTROL=1 ./build-and-install.sh TV_IP:5555`. Revoke it with `adb -s TV_IP:5555 shell pm revoke com.gathin.tvhome android.permission.WRITE_SECURE_SETTINGS`. The system shortcuts work without this grant. The launcher uses the permission for its ADB switch and optional accessibility-helper repair.
+Home Settings includes a **Developer** page with the current ADB debugging state, a confirmed on/off switch, Android Developer options and native TV settings. The page also has **Open Stillframe after startup**, enabled by default. On boot, a short settling delay lets TV input services start before Stillframe opens over a signal input; turn the option off to keep the TV's own startup choice. The ADB switch requires the optional `WRITE_SECURE_SETTINGS` grant; this powerful Android permission is not granted by default. From `launcher/`, grant it during an install with `GRANT_ADB_CONTROL=1 ./build-and-install.sh TV_IP:5555`. Revoke it with `adb -s TV_IP:5555 shell pm revoke com.gathin.tvhome android.permission.WRITE_SECURE_SETTINGS`. The system shortcuts work without this grant. The launcher uses the permission for its ADB switch and optional accessibility-helper repair.
 
 ## Install or update
 
 The checked hardware is **MiTV-AXSO1 / dangalFHD**, Android 9 (SDK 28), firmware PI.6157, 32-bit ARM, with a 1080p display and about 2 GB RAM. This is the verified setup, not a compatibility claim for every TV.
 
 1. Enable ADB on the TV and authorize your computer.
-2. Download the APK from [Releases](https://github.com/prarthanagarwal/stillframe-tv/releases/tag/stillframe-v1.0).
+2. Download the APK from [Releases](https://github.com/prarthanagarwal/stillframe-tv/releases/tag/stillframe-v1.0-startup).
 3. Install it over your existing Stillframe installation:
 
 ```sh
 adb connect TV_IP:5555
-adb -s TV_IP:5555 install -r Stillframe-v1.0.apk
+adb -s TV_IP:5555 install -r Stillframe-v1.0-build10.apk
 adb -s TV_IP:5555 shell am start -W -n com.gathin.tvhome/.MainActivity
 ```
 
@@ -108,7 +109,7 @@ The launcher includes local photographs, so its roughly 2.7 MB APK intentionally
 ### Validation
 
 - **236 launcher unit tests passed**; Android lint reported **zero errors**.
-- The installed 1.0 APK hash was checked against the delivered APK, and Home remained assigned.
+- Stillframe 1.0 build 10 was installed on the TV; Home remained assigned, and after reboot the startup return opened Stillframe over the tuner screen.
 - Real TV captures verify Home and the Dock settings screen shown above.
 - Both requested app removals are disabled; the total disabled package count is 14.
 - AirPlay's foreground service and Bonjour advertisement were verified.
