@@ -10,7 +10,14 @@ Before changing any other device, inspect its actual packages, save enabled/disa
 
 This TV's Google launcher has higher HOME intent priority. During the original setup it was disabled only after Stillframe was installed, visually verified and tested. Keep an ADB recovery connection and the prior Home component before a first-time handover. Installing a launcher does not by itself prove the firmware selected it.
 
-The TV selects Stillframe as its Android Home, but its input layer may restore a tuner/HDMI signal at power-on. **Developer → Open Stillframe after startup** is enabled to bring Home forward after the TV input services settle (about 12 seconds). This does not change HDMI-CEC or the stored input selection; turn the option off to keep the TV's own startup choice.
+Stillframe is the selected Android Home. This Xiaomi firmware can independently auto-play a TV input during power-on; that behavior is controlled by the TV firmware, not the launcher. On the tested MiTV-AXSO1, disabling both firmware flags stopped the input takeover and let Stillframe open directly:
+
+```sh
+adb -s TV_IP:5555 shell settings put global original_device_tv_mode_inputs_auto_play 0
+adb -s TV_IP:5555 shell settings put global set_auto_play 0
+```
+
+Both flags were `1` before this change. Restore that behavior with `settings put global original_device_tv_mode_inputs_auto_play 1` and `settings put global set_auto_play 1`. These firmware settings may differ on other Xiaomi models. HDMI-CEC settings were left as they were.
 
 ## DNS
 
