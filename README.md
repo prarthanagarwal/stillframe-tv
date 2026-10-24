@@ -2,7 +2,7 @@
 
 A personal Android TV home screen with a glass dock, landscape wallpapers, weather and settings you can change from the remote. Built on [CleanYourTV](https://github.com/Gathin23/cleanyourtv), customised and tested on a Xiaomi Mi TV.
 
-[Download the Personal Home 3.1 APK](https://github.com/prarthanagarwal/personal-home/releases/tag/personal-home-v3.1) · [Build from source](#build-from-source) · [AirPlay setup](airplay/README.md) · [Device setup and recovery](launcher/setup/README.md)
+[Download the Personal Home 3.1 APK](https://github.com/prarthanagarwal/stillframe-tv/releases/tag/personal-home-v3.1) · [Build from source](#build-from-source) · [AirPlay setup](airplay/README.md) · [Device setup and recovery](launcher/setup/README.md)
 
 ![Personal Home on a real Mi TV: forest wallpaper, time, Surat weather and a six-app glass dock](docs/images/home.png)
 
@@ -62,7 +62,7 @@ The owner also enabled AdGuard Private DNS (`dns.adguard-dns.com`) and confirmed
 The checked hardware is **MiTV-AXSO1 / dangalFHD**, Android 9 (SDK 28), firmware PI.6157, 32-bit ARM, with a 1080p display and about 2 GB RAM. This is the verified setup, not a compatibility claim for every TV.
 
 1. Enable ADB on the TV and authorize your computer.
-2. Download the APK from [Releases](https://github.com/prarthanagarwal/personal-home/releases/tag/personal-home-v3.1).
+2. Download the APK from [Releases](https://github.com/prarthanagarwal/stillframe-tv/releases/tag/personal-home-v3.1).
 3. Install it over your existing Personal Home installation:
 
 ```sh
@@ -82,8 +82,8 @@ Turn debugging off and revoke ADB authorizations when finished. Our TV was inten
 Use **JDK 17**, Android SDK **platform 34**, **build-tools 34.0.0**, and platform-tools. Set `JAVA_HOME` and `ANDROID_HOME`:
 
 ```sh
-git clone https://github.com/prarthanagarwal/personal-home.git
-cd personal-home/launcher
+git clone https://github.com/prarthanagarwal/stillframe-tv.git
+cd stillframe-tv/launcher
 ./gradlew --no-daemon testReleaseUnitTest lintRelease assembleRelease
 ```
 

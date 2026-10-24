@@ -2,7 +2,7 @@
 
 Your independent, editable Android TV launcher fork, based on CleanYourTV at commit eb0131a32fd8567086f39002f1782f7c1b078ca6. Tested device: Xiaomi MiTV-AXSO1, Android 9 / SDK 28, firmware PI.6157.
 
-Version: **3.1-personal**. It updates the existing `com.gathin.tvhome` identity to preserve your Home assignment and preferences. Original licences and credits are retained. Published project: https://github.com/prarthanagarwal/personal-home . The root README contains the real TV screenshots, releases and companion AirPlay setup.
+Version: **3.1-personal**. It updates the existing `com.gathin.tvhome` identity to preserve your Home assignment and preferences. Original licences and credits are retained. Published project: https://github.com/prarthanagarwal/stillframe-tv . The root README contains the real TV screenshots, releases and companion AirPlay setup.
 
 ## Included controls
 
