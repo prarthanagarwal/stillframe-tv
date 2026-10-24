@@ -375,7 +375,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         HomePreferences.seedWallpapers(this);
-        
+
         if (getIntent().getBooleanExtra("export_inventory", false)) HomeInventory.write(this);
         setContentView(R.layout.activity_main);
         weatherLine = new WeatherLine(this, findViewById(R.id.leftBlock));
