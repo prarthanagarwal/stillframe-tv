@@ -8,7 +8,7 @@ The launcher source and defaults contain the Home settings requested in this con
 
 Before changing any other device, inspect its actual packages, save enabled/disabled packages, properties and settings, and prepare an undo. Use the guarded tools from https://github.com/Gathin23/cleanyourtv rather than applying this list blindly. System packages are disabled for user 0, not uninstalled.
 
-This TV's Google launcher has higher HOME intent priority. During the original setup it was disabled only after Personal Home was installed, visually verified and tested. Keep an ADB recovery connection and the prior Home component before a first-time handover. Installing a launcher does not by itself prove the firmware selected it.
+This TV's Google launcher has higher HOME intent priority. During the original setup it was disabled only after Stillframe was installed, visually verified and tested. Keep an ADB recovery connection and the prior Home component before a first-time handover. Installing a launcher does not by itself prove the firmware selected it.
 
 ## DNS
 

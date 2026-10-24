@@ -1,8 +1,8 @@
-# Personal Home contributor instructions
+# Stillframe contributor instructions
 
-This is prarthanagarwal's Personal Home fork of Gathin23/cleanyourtv. Read README.md, launcher/README.md and launcher/DESIGN.md first. The upstream README is retained as README.upstream.md; upstream model lists and guarded device tools remain available.
+This is prarthanagarwal's Stillframe fork of Gathin23/cleanyourtv. Read README.md, launcher/README.md and launcher/DESIGN.md first. The upstream README is retained as README.upstream.md; upstream model lists and guarded device tools remain available.
 
-- The maintained launcher is `launcher/`, package `com.gathin.tvhome`, version 3.1-personal. Preserve its identity, signing compatibility, native TV inputs, remote navigation and stored choices.
+- The maintained launcher is `launcher/`, package `com.gathin.tvhome`, version 1.0. Preserve its identity, signing compatibility, native TV inputs, remote navigation and stored choices.
 - Keep dock sizing independent from normal app-grid sizing. No recommendation preview or analytics. Weather is optional, cached and fetched only while Home is visible. Glass blur is a cached wallpaper sample, never a per-frame filter.
 - Home Settings owns app, dock, background, weather and receiver controls. Keep its TV Settings shortcut at the top right and all controls usable by D-pad.
 - `airplay/` installs a separate GPL-3 receiver from its official pinned release with checksum verification. Do not mix GPL receiver code into the MIT launcher. Do not commit receiver APKs, keys, credentials or device backups.

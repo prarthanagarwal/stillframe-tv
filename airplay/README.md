@@ -1,6 +1,6 @@
 # AirPlay companion setup
 
-Personal Home links to a separate **AirPlay Server** app by [jqssun](https://github.com/jqssun/android-airplay-server), using UxPlay. The receiver is GPL-3; this directory contains our MIT installer, not the receiver's code. The companion setup was inspired by [nguyenduchoai's AirPlay branch](https://github.com/nguyenduchoai/tv-vibehack/tree/feat/airplay-receiver).
+Stillframe links to a separate **AirPlay Server** app by [jqssun](https://github.com/jqssun/android-airplay-server), using UxPlay. The receiver is GPL-3; this directory contains our MIT installer, not the receiver's code. The companion setup was inspired by [nguyenduchoai's AirPlay branch](https://github.com/nguyenduchoai/tv-vibehack/tree/feat/airplay-receiver).
 
 The installer downloads the official **v0.0.33** universal APK and verifies GitHub's recorded SHA256 before installing anything:
 

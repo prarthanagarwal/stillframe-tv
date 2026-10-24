@@ -15,7 +15,7 @@ import java.net.URLEncoder;
 import java.util.*;
 import java.util.concurrent.*;
 
-/** Personal launcher controls, fully usable with the TV remote and without a computer. */
+/** Stillframe launcher controls, fully usable with the TV remote and without a computer. */
 public final class LauncherSettingsActivity extends Activity {
     static final String EXTRA_REORDER = "com.gathin.tvhome.extra.REORDER_FROM_SETTINGS";
     private static final int IMPORT = 41;
@@ -25,9 +25,18 @@ public final class LauncherSettingsActivity extends Activity {
     private int rows;
     private int category;
     private DockPreview preview;
+    private boolean refreshDeveloperPage;
     private final ExecutorService worker = Executors.newSingleThreadExecutor();
     @Override protected void onCreate(Bundle state) {
         super.onCreate(state); prefs = HomePreferences.prefs(this); render();
+    }
+    @Override protected void onResume() {
+        super.onResume();
+        if (refreshDeveloperPage) { refreshDeveloperPage = false; render(); }
+    }
+    @Override protected void onPause() {
+        if (category == 5) refreshDeveloperPage = true;
+        super.onPause();
     }
     private int dp(float n) { return Math.round(n * getResources().getDisplayMetrics().density); }
     private void render() {
@@ -45,7 +54,7 @@ public final class LauncherSettingsActivity extends Activity {
         LinearLayout layout = new LinearLayout(this);
         LinearLayout.LayoutParams layoutParams=new LinearLayout.LayoutParams(-1,0,1);layoutParams.topMargin=dp(22);page.addView(layout,layoutParams);
         LinearLayout navigation = new LinearLayout(this);navigation.setOrientation(LinearLayout.VERTICAL);
-        String[] tabs={"Dock", "Apps", "Background", "Weather", "Receivers"};
+        String[] tabs={"Dock", "Apps", "Background", "Weather", "Receivers", "Developer"};
         for(int i=0;i<tabs.length;i++) {
             final int at=i; Button tab=new Button(this);tab.setId(2000+i);tab.setText(tabs[i]);tab.setTextSize(17);
             tab.setAllCaps(false);tab.setGravity(Gravity.CENTER_VERTICAL|Gravity.START);tab.setPadding(dp(16),0,dp(16),0);
@@ -53,7 +62,7 @@ public final class LauncherSettingsActivity extends Activity {
             tab.setOnClickListener(v->{category=at;scroll=null;render();});
             LinearLayout.LayoutParams lp=new LinearLayout.LayoutParams(-1,dp(50));lp.bottomMargin=dp(8);navigation.addView(tab,lp);
         }
-        TextView brand=new TextView(this);brand.setText("PERSONAL HOME\n3.1");brand.setTextSize(12);brand.setTextColor(0xFF91A9B7);brand.setPadding(dp(16),dp(20),0,0);navigation.addView(brand);
+        TextView brand=new TextView(this);brand.setText("STILLFRAME\n1.0");brand.setTextSize(12);brand.setTextColor(0xFF91A9B7);brand.setPadding(dp(16),dp(20),0,0);navigation.addView(brand);
         layout.addView(navigation,new LinearLayout.LayoutParams(dp(166),-1));
         scroll = new ScrollView(this);scroll.setFillViewport(true);scroll.setBackground(panelBackground());
         LinearLayout.LayoutParams contentParams=new LinearLayout.LayoutParams(0,-1,1);contentParams.setMarginStart(dp(22));layout.addView(scroll,contentParams);
@@ -78,10 +87,12 @@ public final class LauncherSettingsActivity extends Activity {
             toggleRow("Show weather","weather_enabled",true);
             row("Temperature",prefs.getBoolean("weather_fahrenheit",false)?"Fahrenheit":"Celsius",()->choice("Temperature unit",new String[]{"Celsius","Fahrenheit"},i->{prefs.edit().putBoolean("weather_fahrenheit",i==1).apply();changed();}));
             text("Weather by Open-Meteo.com · CC BY 4.0",13,0xFFA9BDC9,24);
-        } else {
+        } else if(category==4) {
             section("Receivers", "Play from your phone or computer.");
             row("AirPlay settings","Mi TV AirPlay · receiver name, PIN and startup",()->openPackage("io.github.jqssun.airplay"));
-            text("Chromecast and voice search remain available through the TV.\n\nPersonal Home is your independent fork of CleanYourTV.",15,0xFFADBFCA,24);
+            text("Chromecast and voice search remain available through the TV.\n\nStillframe is your independent fork of CleanYourTV.",15,0xFFADBFCA,24);
+        } else if(category==5) {
+            developerSettings();
         }
         page.post(()->{View selected=findViewById(focus);if(selected!=null)selected.requestFocus();scroll.scrollTo(0,y);});
     }
@@ -107,6 +118,65 @@ public final class LauncherSettingsActivity extends Activity {
         row("Reset dock appearance","Restore the starting position, thickness and glass",()->{
             prefs.edit().remove("dock_position").remove("dock_thickness").remove("compact_dock").remove("dock_blur").remove(Config.DOCK_OPACITY_KEY).apply();changed();
         });
+    }
+    private void developerSettings() {
+        section("Developer", "Debugging controls and advanced Android settings.");
+        boolean canWrite = checkSelfPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS)
+                == PackageManager.PERMISSION_GRANTED;
+        boolean adbEnabled = Settings.Global.getInt(getContentResolver(), Settings.Global.ADB_ENABLED, 0) == 1;
+        Switch adb = new Switch(this);
+        adb.setId(101 + rows++);
+        adb.setText("ADB debugging");
+        adb.setTextSize(16);
+        adb.setTextColor(0xFFF0F4F7);
+        adb.setPadding(dp(16), 0, dp(16), 0);
+        adb.setBackgroundResource(R.drawable.settings_choice_bg);
+        adb.setChecked(adbEnabled);
+        adb.setEnabled(canWrite);
+        adb.setContentDescription("ADB debugging, " + (adbEnabled ? "on" : "off"));
+        adb.setOnCheckedChangeListener((button, enabled) -> {
+            button.setOnCheckedChangeListener(null);
+            button.setChecked(adbEnabled);
+            button.setOnCheckedChangeListener((again, requested) -> confirmAdbChange(again, adbEnabled, requested));
+            confirmAdbChange(button, adbEnabled, enabled);
+        });
+        LinearLayout.LayoutParams adbParams = new LinearLayout.LayoutParams(-1, dp(54));
+        adbParams.topMargin = dp(16);
+        body.addView(adb, adbParams);
+        text(canWrite
+                        ? "ADB is " + (adbEnabled ? "on" : "off") + ". Turning it off disconnects the current ADB connection until you turn it back on here or in TV settings."
+                        : "The switch needs WRITE_SECURE_SETTINGS granted from ADB. See the setup guide. The system shortcuts below work without that grant.",
+                14, 0xFFA9BDC9, 8);
+        row("Developer options", "Open Android's full developer controls", this::openDeveloperOptions);
+        row("More TV settings", "Open Xiaomi's native settings for other controls", () -> {
+            Intent vendor = SystemSettings.vendorIntent(this);
+            open(vendor != null ? vendor : SystemSettings.intent(this, Settings.ACTION_SECURITY_SETTINGS));
+        });
+        text("ADB control is optional. Android keeps other protected developer options in its system settings.",
+                13, 0xFF91A9B7, 18);
+    }
+    private void confirmAdbChange(CompoundButton button, boolean current, boolean requested) {
+        button.setOnCheckedChangeListener(null);
+        button.setChecked(current);
+        button.setOnCheckedChangeListener((again, enabled) -> confirmAdbChange(again, current, enabled));
+        String message = requested
+                ? "Turn on ADB debugging? Authorized computers may connect to this TV's debugging interface."
+                : "Turn off ADB debugging? This will disconnect your computer. You can re-enable it from this screen or TV settings.";
+        new AlertDialog.Builder(this).setTitle(requested ? "Enable ADB?" : "Disable ADB?")
+                .setMessage(message)
+                .setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton(requested ? "Enable" : "Turn off", (dialog, which) -> {
+                    if (!Settings.Global.putInt(getContentResolver(), Settings.Global.ADB_ENABLED, requested ? 1 : 0)) {
+                        Toast.makeText(this, "Android could not change ADB. Use TV security settings.", Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                    Toast.makeText(this, requested ? "ADB debugging enabled" : "ADB debugging disabled", Toast.LENGTH_SHORT).show();
+                    render();
+                }).show();
+    }
+    private void openDeveloperOptions() {
+        refreshDeveloperPage = true;
+        open(new Intent(Settings.ACTION_APPLICATION_DEVELOPMENT_SETTINGS));
     }
     private void section(String title,String detail){text(title,25,0xFFF1F5F7,0);text(detail,14,0xFFA9BDC9,6);}
     private void slider(LinearLayout parent,String title,String key,int min,int max,int fallback,java.util.function.IntFunction<String> format) {
