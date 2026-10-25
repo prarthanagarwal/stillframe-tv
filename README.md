@@ -71,6 +71,8 @@ The same APK also runs on **AI PONT / samseong / MStar m7322**, Android TV 11, f
 
 The owner chose instant focus for this TV under **Dock → Animate focus**. All streaming apps except the requested Play Movies removal, Chromecast, voice, firmware updates, MediaTek input services and vendor remote services are retained. The device-specific cleanup list records four newly disabled packages, separately from the ten already disabled before this session. See [AI PONT setup and recovery](launcher/setup/bpl-ai-pont.md).
 
+An optional [Cable TV companion](launcher/cable-tv/README.md) adds a clearly labelled **Cable TV / HDMI 2** dock tile for this set. It targets the cable box's physical input directly, has no background service, and leaves the existing startup choice intact.
+
 ## Install or update
 
 The checked hardware is **MiTV-AXSO1 / dangalFHD**, Android 9 (SDK 28), firmware PI.6157, and **BPL AI PONT / samseong**, Android 11 (SDK 30), firmware RTO2.230323.001. Both run 32-bit ARM apps at 1080p. These are tested devices, not a compatibility claim for every TV.

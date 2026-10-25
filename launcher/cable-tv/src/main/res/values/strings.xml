@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Cable TV</string>
+    <string name="input_unavailable">HDMI 2 is unavailable. Open TV Inputs.</string>
+</resources>

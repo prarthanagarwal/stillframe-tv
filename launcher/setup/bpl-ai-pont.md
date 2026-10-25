@@ -6,6 +6,8 @@ Tested hardware: AI PONT, device `samseong`, MStar/MediaTek `m7322`, Android TV 
 
 Stillframe 1.0 build 13 owns Android Home. FLauncher was removed through the TV's uninstaller after Stillframe was installed and visually checked. The firmware's cable startup behavior is retained. Stillframe uses `com.mediatek.wwtv.tvcenter` for its Live TV entry when `com.android.tv` is absent.
 
+The parents' **Cable TV** dock tile is a separate [HDMI 2 shortcut](../cable-tv/README.md), package `com.stillframe.cabletv`. It requests physical HDMI 2 directly through its passthrough URI; it does not use the Live TV app's remembered source. It is placed first in the dock, with the six existing streaming apps retained. The owner requested no reboot or tests for this addition and will check input switching personally.
+
 The settings APK's `power_boot_resume_slice_uri` is empty on this firmware. Its generic Power-on behavior page therefore has no configured provider. Do not copy Xiaomi's auto-play flags to this board or add a delayed Home launch. Native power-on choice is left to the TV firmware.
 
 ## Cleanup
