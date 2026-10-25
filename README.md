@@ -1,8 +1,8 @@
 # Stillframe
 
-A calm Android TV home screen with a glass dock, landscape wallpapers, weather and settings you can change from the remote. Built on [CleanYourTV](https://github.com/Gathin23/cleanyourtv), customised and tested on a Xiaomi Mi TV.
+A calm Android TV home screen with a glass dock, landscape wallpapers, weather and settings you can change from the remote. Built on [CleanYourTV](https://github.com/Gathin23/cleanyourtv), customised and tested on a Xiaomi Mi TV and a BPL/Changhong AI PONT.
 
-[Download Stillframe 1.0, build 11](https://github.com/prarthanagarwal/stillframe-tv/releases/tag/stillframe-v1.0-build11) · [Build from source](#build-from-source) · [AirPlay setup](airplay/README.md) · [Device setup and recovery](launcher/setup/README.md)
+[Download Stillframe 1.0, build 13](https://github.com/prarthanagarwal/stillframe-tv/releases/tag/stillframe-v1.0-build13) · [Build from source](#build-from-source) · [AirPlay setup](airplay/README.md) · [Device setup and recovery](launcher/setup/README.md)
 
 ![Stillframe on a real Mi TV: forest wallpaper, time, Surat weather and a six-app glass dock](docs/images/home.png)
 
@@ -19,7 +19,7 @@ A calm Android TV home screen with a glass dock, landscape wallpapers, weather a
 | TV | Inputs, network and Home Settings on Home; TV Settings stays at the top right inside settings |
 | Receivers | AirPlay settings shortcut, with the existing Chromecast receiver retained |
 | Developer | Confirmed ADB switch and shortcuts to Android Developer options and native TV settings |
-| Startup | Opens Stillframe after Android settles if this TV initially shows a signal input; can be turned off |
+| Power on | Uses the TV firmware's startup choice; no delayed boot receiver |
 
 The initial dock is **Netflix, Prime Video, YouTube, JioHotstar, Stremio and Spotify**. There are no recommendation previews or sponsored content rows in Stillframe.
 
@@ -35,9 +35,11 @@ The screenshots were captured directly from the MiTV-AXSO1 during the 3.1 predec
 
 The frosted dock is made from a small cached wallpaper sample, blurred off the main thread when the wallpaper changes or Home rebuilds. App navigation does not calculate blur on every frame. Weather uses [Open-Meteo](https://open-meteo.com/) over HTTPS, refreshes while Home is visible and keeps a labelled cache when needed. No analytics service was added.
 
+On a cold launch, the header draws while the first wallpaper and app artwork load on background workers. The same path restores artwork after Android releases it under memory pressure. Old results are discarded after a newer load, memory trim or activity shutdown, and an arriving grid preserves a top-bar selection the owner made while it was loading.
+
 ## AirPlay, without replacing Chromecast
 
-The separate [AirPlay Server](https://github.com/jqssun/android-airplay-server) receiver is installed and configured as **Mi TV AirPlay**, with start at boot and background operation. Its foreground service and Bonjour advertisement were verified on the TV. Open **Home Settings → Receivers → AirPlay settings** for its name, PIN and startup options.
+The separate [AirPlay Server](https://github.com/jqssun/android-airplay-server) receiver is installed as **Mi TV AirPlay** on the Mi TV and **Hall TV AirPlay** on the AI PONT, with start at boot and background operation. Open **Home Settings → Receivers → AirPlay settings** for its name, PIN and startup options.
 
 This fork includes a pinned installer for the official **v0.0.33** APK, with SHA256 verification before installation:
 
@@ -63,17 +65,23 @@ The owner also enabled AdGuard Private DNS (`dns.adguard-dns.com`) and confirmed
 
 Home Settings includes a **Developer** page with the current ADB debugging state, a confirmed on/off switch, Android Developer options and native TV settings. The ADB switch requires the optional `WRITE_SECURE_SETTINGS` grant; this powerful Android permission is not granted by default. From `launcher/`, grant it during an install with `GRANT_ADB_CONTROL=1 ./build-and-install.sh TV_IP:5555`. Revoke it with `adb -s TV_IP:5555 shell pm revoke com.gathin.tvhome android.permission.WRITE_SECURE_SETTINGS`. The system shortcuts work without this grant. The launcher uses the permission for its ADB switch and optional accessibility-helper repair. Stillframe does not run a delayed launch after boot; the TV firmware controls whether it auto-plays a TV input at power-on.
 
+## BPL / Changhong AI PONT
+
+The same APK also runs on **AI PONT / samseong / MStar m7322**, Android TV 11, firmware RTO2.230323.001, with about 1.3 GiB usable RAM. Stillframe automatically uses its MediaTek Live TV player in the Inputs menu. Cable startup is preserved; the Home button opens Stillframe. This firmware does not configure Android's native power-on-behavior provider, so the launcher does not offer an unsupported startup switch.
+
+The owner chose instant focus for this TV under **Dock → Animate focus**. All streaming apps except the requested Play Movies removal, Chromecast, voice, firmware updates, MediaTek input services and vendor remote services are retained. The device-specific cleanup list records four newly disabled packages, separately from the ten already disabled before this session. See [AI PONT setup and recovery](launcher/setup/bpl-ai-pont.md).
+
 ## Install or update
 
-The checked hardware is **MiTV-AXSO1 / dangalFHD**, Android 9 (SDK 28), firmware PI.6157, 32-bit ARM, with a 1080p display and about 2 GB RAM. This is the verified setup, not a compatibility claim for every TV.
+The checked hardware is **MiTV-AXSO1 / dangalFHD**, Android 9 (SDK 28), firmware PI.6157, and **BPL AI PONT / samseong**, Android 11 (SDK 30), firmware RTO2.230323.001. Both run 32-bit ARM apps at 1080p. These are tested devices, not a compatibility claim for every TV.
 
 1. Enable ADB on the TV and authorize your computer.
-2. Download the APK from [Releases](https://github.com/prarthanagarwal/stillframe-tv/releases/tag/stillframe-v1.0-startup).
+2. Download the APK from [Releases](https://github.com/prarthanagarwal/stillframe-tv/releases/tag/stillframe-v1.0-build13).
 3. Install it over your existing Stillframe installation:
 
 ```sh
 adb connect TV_IP:5555
-adb -s TV_IP:5555 install -r Stillframe-v1.0-build10.apk
+adb -s TV_IP:5555 install -r Stillframe-v1.0-build13.apk
 adb -s TV_IP:5555 shell am start -W -n com.gathin.tvhome/.MainActivity
 ```
 
@@ -109,7 +117,8 @@ The launcher includes local photographs, so its roughly 2.7 MB APK intentionally
 ### Validation
 
 - **236 launcher unit tests passed**; Android lint reported **zero errors**.
-- Stillframe 1.0 build 11 is installed on the TV, Home remains assigned, and firmware input auto-play is disabled so Android can open Stillframe directly.
+- Stillframe 1.0 build 11 remains installed on the Mi TV, Home remains assigned, and its firmware input auto-play is disabled so Android can open Stillframe directly.
+- Stillframe 1.0 build 13 is installed on the AI PONT with native cable startup retained. After its startup changes, first-frame checks measured 1,042 ms from a fresh process and 216 ms after a memory trim; saved dock and wallpaper choices survived.
 - Real TV captures verify Home and the Dock settings screen shown above.
 - Both requested app removals are disabled; the total disabled package count is 14.
 - AirPlay's foreground service and Bonjour advertisement were verified.

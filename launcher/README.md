@@ -2,7 +2,7 @@
 
 Your independent, editable Android TV launcher fork, based on CleanYourTV at commit eb0131a32fd8567086f39002f1782f7c1b078ca6. Tested device: Xiaomi MiTV-AXSO1, Android 9 / SDK 28, firmware PI.6157.
 
-Version: **1.0** (version code 11). It updates the existing `com.gathin.tvhome` identity to preserve your Home assignment and preferences. Original licences and credits are retained. Published project: https://github.com/prarthanagarwal/stillframe-tv . The root README contains the real TV screenshots, releases and companion AirPlay setup.
+Version: **1.0** (version code 13). It updates the existing `com.gathin.tvhome` identity to preserve your Home assignment and preferences. Original licences and credits are retained. Published project: https://github.com/prarthanagarwal/stillframe-tv . The root README contains the real TV screenshots, releases and companion AirPlay setup. Also tested on BPL/Changhong AI PONT, Android 11 / SDK 30, firmware RTO2.230323.001; its MediaTek Live TV player is selected automatically when the standard player is absent.
 
 ## Included controls
 
@@ -32,7 +32,7 @@ Use JDK 17, Android SDK platform 34, build-tools 34.0.0 and platform-tools. Set 
 ./gradlew --no-daemon testReleaseUnitTest lintRelease assembleRelease
 ```
 
-The signed APK is `app/build/outputs/apk/release/app-release.apk`. Keep the Android signing key used for the first installation; later updates require that same key. Version code 11 updates build 10 in place; the displayed version remains 1.0.
+The signed APK is `app/build/outputs/apk/release/app-release.apk`. Keep the Android signing key used for the first installation; later updates require that same key. Version code 13 updates earlier Stillframe builds in place; the displayed version remains 1.0.
 
 With the TV connected and authorized over ADB:
 

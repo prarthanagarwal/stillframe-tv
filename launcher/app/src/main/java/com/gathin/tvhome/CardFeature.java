@@ -19,7 +19,7 @@ final class CardFeature {
         void failed(Throwable t);
     }
 
-    private static boolean broken;
+    private static volatile boolean broken;
     /** Where the one failure line goes; tests replace it, since android.util.Log is not available there. */
     static Reporter reporter = t -> Log.w(Cards.TAG, "module cards switched off for this session: " + t);
 

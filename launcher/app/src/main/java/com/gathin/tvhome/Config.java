@@ -374,6 +374,11 @@ final class Config {
         List<String> hidden = new ArrayList<>(Arrays.asList(res.getStringArray(R.array.hidden_apps)));
         List<String> libraryApps = new ArrayList<>(Arrays.asList(res.getStringArray(R.array.library_apps)));
         String liveTv = res.getString(R.string.live_tv_package).trim();
+        // MediaTek/Changhong supplies its own Live TV player instead of com.android.tv.
+        if (liveTv.equals("com.android.tv") && ctx.getPackageManager().getLeanbackLaunchIntentForPackage(liveTv) == null
+                && ctx.getPackageManager().getLeanbackLaunchIntentForPackage("com.mediatek.wwtv.tvcenter") != null) {
+            liveTv = "com.mediatek.wwtv.tvcenter";
+        }
         String liveTvAction = res.getString(R.string.live_tv_action).trim();
         String liveTvInputId = res.getString(R.string.live_tv_input_id).trim();
         List<String> launchActions = new ArrayList<>(Arrays.asList(res.getStringArray(R.array.launch_actions)));

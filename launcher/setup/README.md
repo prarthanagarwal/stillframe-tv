@@ -2,6 +2,8 @@
 
 The launcher source and defaults contain the Home settings requested in this conversation. Android system package changes and the separate AirPlay receiver are device setup, recorded here rather than requiring the launcher to gain system-level permissions.
 
+The Xiaomi notes below are device-specific. For the hall TV, use [BPL/Changhong AI PONT setup and recovery](bpl-ai-pont.md), which preserves cable startup and the MediaTek input stack.
+
 ## MiTV-AXSO1 cleanup
 
 `mi-tv-axso1-disabled.txt` records the exact 14 packages disabled on this TV, including Google Play Movies & TV and Xiaomi TV+. All other original packages were retained. Preserve Chromecast, voice search, the Play Store/Services, keyboard, Bluetooth/remote services, firmware updates and TV/HDMI input components.

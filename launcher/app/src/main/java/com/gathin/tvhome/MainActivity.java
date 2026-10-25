@@ -90,6 +90,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * tvOS style home: black, a pinned dock row, an app grid, and one glass highlight that springs between tiles.
@@ -178,8 +181,6 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private TextView btnWifi;
     /** The network pill's icon as last set, so a refresh that changes nothing does not lay the top bar out again. */
     private int wifiIcon;
-    /** The pills have been filled in once; later resumes refresh them after the first frame. */
-    private boolean pillsShown;
     private TextView shamsiDate;
     /** lunar_date: the lunisolar date under the date line, and the time zone it is computed for. */
     private TextView lunarDate;
@@ -257,6 +258,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private final TileRefresh tileRefresh = new TileRefresh();
     /** PackageManager's change counter at the last rebuild, to catch a package broadcast that never arrived. */
     private int packageSequence;
+    private final ExecutorService tileLoader = Executors.newSingleThreadExecutor();
+    private Future<?> tileLoad;
+    private int tileLoadRequest;
+    private boolean tileLoadInteracted;
     /** The Inputs or Module cards dropdown while one is open, so onPause can close it. */
     private PopupWindow openPopup;
     /** Reorder mode is on (top-bar button). */
@@ -955,14 +960,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         // The network and Inputs pills keep their state while Home is in the background, and callbacks update them
         // when the network or the inputs change, so this refresh only catches anything missed. Its binder calls
         // (about 7 ms on a TCL C755, most of it WifiManager.getConnectionInfo) would hold up the first frame back
-        // on Home, so after the first resume it runs once that frame is drawn.
-        if (pillsShown) {
-            refreshPillsAfterNextDraw();
-        } else {
-            updateWifiLabel();
-            updateInputsButton();
-            pillsShown = true;
-        }
+        // on Home, so it runs once that frame is drawn, including on a cold start.
+        refreshPillsAfterNextDraw();
         if (showStats) startStats();
         sky.update();
         wallpaperPlayer.start();
@@ -1022,6 +1021,11 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
      *                 on a return to the same tiles it would only mark a change that didn't happen.
      */
     private void reloadApps(boolean animate, boolean rebuild, boolean entrance) {
+        if (rebuild && adapter.appCount() == 0) {
+            loadFirstTiles(animate, entrance);
+            return;
+        }
+        if (tileLoad != null && adapter.appCount() == 0) return;
         cancelPendingFocusScroll();
         RecyclerView.ViewHolder footer = grid.findViewHolderForAdapterPosition(adapter.appCount());
         final boolean restoreLibrary = adapter.isLibraryAt(adapter.appCount()) && footer != null
@@ -1062,6 +1066,56 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             startPendingSettingsReorder();
             showCardPrompt();
         }
+    }
+
+    /** Show the header immediately while cold package resources load; publish only the latest request. */
+    private void loadFirstTiles(boolean animate, boolean entrance) {
+        cancelTileLoad();
+        final int request = tileLoadRequest;
+        final int since = packageSequence;
+        final Set<String> hidden = new HashSet<>(hiddenApps);
+        tileLoadInteracted = false;
+        tileLoad = tileLoader.submit(() -> {
+            android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+            try {
+                final int sequence = currentPackageSequence(since);
+                final List<ResolveInfo> leanback = getPackageManager().queryIntentActivities(
+                        new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LEANBACK_LAUNCHER), 0);
+                if (Thread.currentThread().isInterrupted()) return;
+                final List<Cards.Card> none = Collections.emptyList();
+                final List<Cards.Card> found = moduleCards ? CardFeature.run(() -> Cards.discover(this, hidden,
+                        () -> Cards.load(Cards.storeFile(this)), leanback), none) : none;
+                final AppAdapter.Loaded loaded = adapter.load(found.isEmpty() ? none
+                        : CardFeature.run(() -> Cards.shown(found), none), leanback);
+                handler.post(() -> {
+                    if (request != tileLoadRequest || isFinishing() || isDestroyed()) return;
+                    tileLoad = null;
+                    cards = found;
+                    final String key = lastFocusedKey;
+                    final int slot = lastFocused;
+                    adapter.apply(loaded);
+                    lastFocusedKey = key;
+                    lastFocused = slot;
+                    packageSequence = sequence;
+                    if (started) reloadApps(animate && !tileLoadInteracted && openPopup == null, false, entrance);
+                    else tilesReady = true;
+                });
+            } catch (RuntimeException failure) {
+                handler.post(() -> {
+                    if (request != tileLoadRequest || isFinishing() || isDestroyed()) return;
+                    tileLoad = null;
+                    tileRefresh.invalidate();
+                    android.util.Log.w("TvHome.Apps", "Could not load app artwork", failure);
+                    if (started) Toast.makeText(this, "Could not load apps. Press Home to try again.", Toast.LENGTH_LONG).show();
+                });
+            }
+        });
+    }
+
+    private void cancelTileLoad() {
+        tileLoadRequest++;
+        if (tileLoad != null) tileLoad.cancel(true);
+        tileLoad = null;
     }
 
     /** True when PackageManager reports apps changed since the last rebuild (one binder call). */
@@ -1122,6 +1176,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     @Override
     public void onUserInteraction() {
         super.onUserInteraction();
+        if (tileLoad != null) tileLoadInteracted = true;
         restartIdleClock();
     }
 
@@ -1172,6 +1227,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         // RUNNING_LOW and CRITICAL also arrive while Home is visible when an accessibility service keeps the
         // process in the foreground; never blank the screen the owner is looking at.
         if (!MemoryTrimPolicy.shouldRelease(level, started)) return;
+        cancelTileLoad();
         adapter.clear();
         // Detach the adapter too: with Home stopped no layout pass runs, so the tile views (and the bitmaps
         // they hold) would stay attached until Home comes back. setAdapter(null) recycles them now.
@@ -1196,6 +1252,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        cancelTileLoad();
+        tileLoader.shutdownNow();
         unregisterReceiver(packageReceiver);
         wallpaperPlayer.close();
         weatherLine.close();

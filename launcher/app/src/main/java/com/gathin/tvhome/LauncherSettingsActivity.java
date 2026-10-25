@@ -89,7 +89,7 @@ public final class LauncherSettingsActivity extends Activity {
             text("Weather by Open-Meteo.com · CC BY 4.0",13,0xFFA9BDC9,24);
         } else if(category==4) {
             section("Receivers", "Play from your phone or computer.");
-            row("AirPlay settings","Mi TV AirPlay · receiver name, PIN and startup",()->openPackage("io.github.jqssun.airplay"));
+            row("AirPlay settings","Receiver name, PIN and startup",()->openPackage("io.github.jqssun.airplay"));
             text("Chromecast and voice search remain available through the TV.\n\nStillframe is your independent fork of CleanYourTV.",15,0xFFADBFCA,24);
         } else if(category==5) {
             developerSettings();
@@ -148,9 +148,9 @@ public final class LauncherSettingsActivity extends Activity {
                         : "The switch needs WRITE_SECURE_SETTINGS granted from ADB. See the setup guide. The system shortcuts below work without that grant.",
                 14, 0xFFA9BDC9, 8);
         row("Developer options", "Open Android's full developer controls", this::openDeveloperOptions);
-        row("More TV settings", "Open Xiaomi's native settings for other controls", () -> {
+        row("More TV settings", "Open this TV's system settings for other controls", () -> {
             Intent vendor = SystemSettings.vendorIntent(this);
-            open(vendor != null ? vendor : SystemSettings.intent(this, Settings.ACTION_SECURITY_SETTINGS));
+            open(vendor != null ? vendor : SystemSettings.intent(this, Settings.ACTION_SETTINGS));
         });
         text("ADB control is optional. Android keeps other protected developer options in its system settings.",
                 13, 0xFF91A9B7, 18);

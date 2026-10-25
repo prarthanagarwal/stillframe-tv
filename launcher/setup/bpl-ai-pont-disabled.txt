@@ -1,0 +1,7 @@
+# Newly disabled on BPL/Changhong AI PONT, samseong/m7322, Android 11 RTO2.230323.001.
+# Reference only. Inspect the actual TV, back up first and use the guarded tools.
+# This excludes the ten packages that were already disabled before the session.
+com.homwee.aipont
+com.google.android.videos
+com.google.android.syncadapters.calendar
+com.android.printspooler

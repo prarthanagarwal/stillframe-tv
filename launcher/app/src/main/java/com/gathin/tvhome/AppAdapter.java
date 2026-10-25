@@ -251,18 +251,31 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         setHasStableIds(true);
     }
 
-    /**
-     * Rebuilds the tiles. A shown module card stands in for every tile of its package (same component,
-     * so focus follows it); hidden_apps wins over a card, and a card's package in dock_apps takes that slot.
-     */
+    static final class Loaded {
+        final List<Entry> entries;
+        final Set<String> tvPackages;
+        final Entry homeSettings;
+
+        Loaded(List<Entry> entries, Set<String> tvPackages, Entry homeSettings) {
+            this.entries = entries;
+            this.tvPackages = tvPackages;
+            this.homeSettings = homeSettings;
+        }
+    }
+
+    /** Rebuild synchronously for edits to an already visible grid. */
     void reload(List<Cards.Card> cards, List<ResolveInfo> leanback) {
+        apply(load(cards, leanback));
+    }
+
+    /** Package resources can be cold after boot; prepare them without touching live adapter state. */
+    Loaded load(List<Cards.Card> cards, List<ResolveInfo> leanback) {
         PackageManager pm = ctx.getPackageManager();
         // The LEANBACK query is shared with the module-card check (MainActivity); copy it before adding
         // library apps so the caller's list stays as it was.
         List<ResolveInfo> found = new ArrayList<>(leanback);
         Set<String> tvPackages = new HashSet<>();
         for (ResolveInfo ri : found) if (ri.activityInfo != null) tvPackages.add(ri.activityInfo.packageName);
-        leanbackPackages = tvPackages;
         // Copy before merging: LibraryApps.load() may return an immutable empty set (#419).
         Set<String> added = new HashSet<>(LibraryApps.load(ctx));
         added.addAll(libraryPreload);
@@ -309,6 +322,19 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 fresh.add(new Entry(label, component, banner, icon));
             }
         }
+        Entry settings = null;
+        if (showHomeSettings && pm.resolveActivity(new Intent(Settings.ACTION_HOME_SETTINGS), 0) != null) {
+            settings = new Entry(Entry.HOME_SETTINGS, ctx.getString(R.string.home_settings),
+                    new ComponentName(ctx, HomeSettingsActivity.class), null,
+                    ctx.getDrawable(R.drawable.ic_home_settings), null, 0);
+        }
+        return new Loaded(fresh, tvPackages, settings);
+    }
+
+    /** Publish a complete snapshot on the UI thread, using the latest saved order. */
+    void apply(Loaded loaded) {
+        List<Entry> fresh = new ArrayList<>(loaded.entries);
+        leanbackPackages = loaded.tvPackages;
         Collections.sort(fresh, (a, b) -> {
             // The owner's own order first; tiles it does not know (new installs) follow by the rule below.
             int saved = Order.compare(savedRanks, a.component.flattenToShortString(), b.component.flattenToShortString());
@@ -325,12 +351,7 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             return a.label.compareToIgnoreCase(b.label);
         });
         // Retain the optional Default-home tile until dependent tile-ordering work is merged.
-        if (showHomeSettings
-                && pm.resolveActivity(new Intent(Settings.ACTION_HOME_SETTINGS), 0) != null) {
-            fresh.add(new Entry(Entry.HOME_SETTINGS, ctx.getString(R.string.home_settings),
-                    new ComponentName(ctx, HomeSettingsActivity.class), null,
-                    ctx.getDrawable(R.drawable.ic_home_settings), null, 0));
-        }
+        if (loaded.homeSettings != null) fresh.add(loaded.homeSettings);
         docked = 0;
         while (docked < fresh.size() && isDocked(fresh.get(docked))) docked++;
         emptySlots = dockRow && !reordering ? DockSlots.empty(docked, dockSize, fresh.size(), fillDock) : 0;
